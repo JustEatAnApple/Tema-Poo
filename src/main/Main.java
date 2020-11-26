@@ -3,16 +3,18 @@ package main;
 import checker.Checkstyle;
 import checker.Checker;
 import common.Constants;
-import fileio.Input;
-import fileio.InputLoader;
-import fileio.Writer;
+import fileio.*;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -66,12 +68,43 @@ public final class Main {
                               final String filePath2) throws IOException {
         InputLoader inputLoader = new InputLoader(filePath1);
         Input input = inputLoader.readData();
+        // actors, actions, users, movies, serials
 
         Writer fileWriter = new Writer(filePath2);
         JSONArray arrayResult = new JSONArray();
 
         //TODO add here the entry point to your implementation
 
+        ActorList listofActors = new ActorList();
+        listofActors.getInputActors(input.getActors());
+
+        MovieList listofMovies = new MovieList();
+        listofMovies.getInputMovies(input.getMovies());
+
+        UserList listofUsers = new UserList();
+        listofUsers.getInputUsers(input.getUsers());
+
+        SerialList listofSerials = new SerialList();
+        listofSerials.getInputSerials(input.getSerials());
+
+        ActionList listofActions = new ActionList();
+        listofActions.getInputActions(input.getCommands(), listofUsers, listofMovies,
+                listofActors, listofSerials);
+
+        for (int i = 0; i < listofActions.getSize(); i++) {
+            Action cmd = listofActions.getAction(i);
+            //cmd.checkActionType();
+
+            JSONObject object = fileWriter.writeFile(cmd.getActionId(), "", cmd.checkActionType());
+            arrayResult.add(object);
+            System.out.print("Alo boss: ");
+            System.out.println(object);
+            System.out.println();
+            // do commands field, mesaje
+
+
+
+        }
         fileWriter.closeJSON(arrayResult);
     }
 }
