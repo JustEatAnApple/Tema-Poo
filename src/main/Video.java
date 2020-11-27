@@ -12,7 +12,7 @@ public class Video {
     private ArrayList<String> genres;
     private int priority;
 
-    public Video(String name, int year,double rating, int favsappearances, int duration,
+    public Video(String name, int year, double rating, int favsappearances, int duration,
                  int nrviews, ArrayList<String> genres, int priority) {
         this.name = name;
         this.year = year;

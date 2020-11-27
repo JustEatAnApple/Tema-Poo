@@ -98,7 +98,7 @@ public class Movie {
             rating += r;
         }
         if (!ratings.isEmpty()) {
-            rating /= ratings.size();
+            rating = rating / ratings.size();
         }
         return rating;
     }

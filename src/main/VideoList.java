@@ -44,7 +44,7 @@ public class VideoList {
                     String k = entry.getKey();
                     Integer v = entry.getValue();
                     if (k.equals(mv.getTitle())) {
-                        mv.addnofviews(v);
+                        mv.addnofviews(1);
                     }
                 }
             }
@@ -68,7 +68,7 @@ public class VideoList {
                     String k = entry.getKey();
                     Integer v = entry.getValue();
                     if (k.equals(sr.getTitle())) {
-                        sr.addnofviews(v);
+                        sr.addnofviews(1);
                     }
                 }
             }

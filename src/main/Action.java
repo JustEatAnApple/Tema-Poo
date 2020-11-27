@@ -169,28 +169,28 @@ public class Action {
             Recommendation r = new Recommendation(actrs, vds, usrs);
             switch (type) {
                 case "standard" -> {
-                    return "StandardRecommendation result: " + r.recommendStandard(usr);
+                    return r.recommendStandard(usr);
                 }
                 case "best_unseen" -> {
-                    return "BestRatedUnseenRecommendation result: " + r.recommendBestUnseen(usr);
+                    return r.recommendBestUnseen(usr);
                 }
                 case "popular" -> {
                     if (usr.getSubscriptionType().equals("BASIC")) {
                         return "PopularRecommendation cannot be applied!";
                     }
-                    // return "PopularRecommendation result: " + r.recommendPopular(usr);
+                    return r.recommendPopular(usr);
                 }
                 case "favorite" -> {
                     if (usr.getSubscriptionType().equals("BASIC")) {
                         return "FavoriteRecommendation cannot be applied!";
                     }
-                    // return "FavoriteRecommendation result: " + r.recommendFavorite(usr);
+                    return r.recommendFavorite(usr);
                 }
                 case "search" -> {
                     if (usr.getSubscriptionType().equals("BASIC")) {
                         return "SearchRecommendation cannot be applied!";
                     }
-                    // return "SearchRecommendation result: " + r.recommendSearch(usr, genre);
+                    return r.recommendSearch(usr, genre);
                 }
             }
         }

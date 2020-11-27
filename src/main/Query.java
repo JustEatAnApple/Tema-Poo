@@ -21,29 +21,12 @@ public class Query {
         this.v = v;
     }
 
-    public boolean strStr(String haystack, String needle) {
-        if (haystack == null || needle == null) {
-            return false;
-        }
-        int hLength = haystack.length();
-        int nLength = needle.length();
-        if (hLength < nLength) {
-            return false;
-        }
-        if (nLength == 0) {
-            return false;
-        }
-        for (int i = 0; i <= hLength - nLength; i++) {
-            if ((int) haystack.charAt(i) == (int) needle.charAt(0)) {
-                int j = 0;
-                for (; j < nLength; j++) {
-                    if ((int) haystack.charAt(i + j) != (int) needle.charAt(j)) {
-                        break;
-                    }
-                }
-                if (j == nLength) {
-                    return true;
-                }
+    public boolean strStr(String hyastack, String niidl) {
+        String haystack = hyastack.toLowerCase(), needle = niidl.toLowerCase();
+        String[] listedhaystack = haystack.split("\\W+", -2);
+        for (String s : listedhaystack) {
+            if (s.equals(needle)) {
+                return true;
             }
         }
         return false;
@@ -55,6 +38,7 @@ public class Query {
                 int check = 0;
                 double guard = 0;
                 for (int j = 0; j < m.getSize(); j++) {
+                    guard = 0;
                     if (aaux.getFilmography().get(i).equals(m.getMovie(j).getTitle())) {
                         guard = m.getMovie(j).calcRating();
                         if (guard != 0) {
@@ -67,20 +51,20 @@ public class Query {
                 }
                 if (check == 0) {
                     for (int j = 0; j < s.getSize(); j++) {
+                        guard = 0;
                         if (aaux.getFilmography().get(i).equals(s.getSerial(j).getTitle())) {
                             guard = s.getSerial(j).calcRating();
                             if (guard != 0) {
                                 aaux.addNrofratings();
                                 aaux.addRating(guard);
                             }
-
                             break;
                         }
                     }
                 }
             }
             if (aaux.getNrofratings() != 0) {
-                aaux.setRating(aaux.getRating() / aaux.getNrofratings());
+                aaux.setRating((aaux.getRating() / aaux.getNrofratings()));
             }
         }
 
@@ -97,6 +81,7 @@ public class Query {
         switch (type) {
             case "asc" -> {
                 for (int i = 0; i < a.getList().size(); i++) {
+                    // for (int i = a.getList().size() - nr - 1; i < a.getList().size(); i++)
                     if (a.getList().get(i).getRating() != 0) {
                         k = 1;
                         start += a.getList().get(i).getName() + ", ";
@@ -111,16 +96,24 @@ public class Query {
                 }
             }
             case "desc" -> {
-                for (int i = a.getList().size() - nr; i < a.getList().size() - 1; i++) {
-                    if (a.getList().get(i).getRating() != 0) {
+                for (int i = a.getList().size() - 1; i >= 0; i--) {
+                    if (a.getList().get(i).getRating() != 0.0) {
                         start += a.getList().get(i).getName() + ", ";
                         k = 1;
+                        gettonr++;
+                    }
+                    if (gettonr == nr) {
+                        break;
                     }
                 }
                 if (k == 1) {
                     start = start.substring(0, start.length() - 2);
                 }
             }
+        }
+        for (Actor act : a.getList()) {
+            act.setNrofratings(0);
+            act.setRating(0);
         }
         start += "]";
         return start;
@@ -187,10 +180,12 @@ public class Query {
     }
 
     public void getActorDescription(List<String> descwords) {
+        int j = 0;
         for (Actor aaux : a.getList()) {
             int count = descwords.size();
             for (int i = 0; i < descwords.size(); i++) {
-                if (strStr(aaux.getCareerDescription(), descwords.get(i))) {
+                String sufletu = aaux.getCareerDescription();
+                if (strStr(sufletu, descwords.get(i))) {
                     count--;
                 }
             }
@@ -218,8 +213,8 @@ public class Query {
                 }
             }
             case "desc" -> {
-                for (int i = a.getList().size(); i < a.getList().size() - 1; i++) {
-                    if (a.getList().get(i).getRating() != 0) {
+                for (int i = a.getList().size() - 1; i >= 0; i--) {
+                    if (a.getList().get(i).isHaswords()) {
                         start += a.getList().get(i).getName() + ", ";
                         k = 1;
                     }
@@ -228,6 +223,9 @@ public class Query {
                     start = start.substring(0, start.length() - 2);
                 }
             }
+        }
+        for (Actor act : a.getList()) {
+            act.setHaswords(false);
         }
         start += "]";
         return start;
@@ -252,6 +250,7 @@ public class Query {
             }
             if (check == 0) {
                 if (filter.get(1).get(0) != null) {
+                    ok = 0;
                     for (int i = 0; i < vd.getGenres().size(); i++) {
                         if (vd.getGenres().get(i).equals(filter.get(1).get(0))) {
                             ok = 1;
@@ -270,6 +269,8 @@ public class Query {
         int k = 0, count = 0;
         ArrayList<Video> filteredmovs = new ArrayList<Video>();
         filteredmovs = getMovieListFav(filter);
+        Comparator<Video> cmpmovA = Comparator.comparing(Video::getName);
+        Collections.sort(filteredmovs, cmpmovA);
         Comparator<Video> cmpmovF = Comparator.comparing(Video::getFavsappearances);
         Collections.sort(filteredmovs, cmpmovF);
         switch (type) {
@@ -354,6 +355,8 @@ public class Query {
         int k = 0, count = 0;
         ArrayList<Video> filteredmovs = new ArrayList<Video>();
         filteredmovs = getMovieListFav(filter);
+        Comparator<Video> cmpmovA = Comparator.comparing(Video::getName);
+        Collections.sort(filteredmovs, cmpmovA);
         Comparator<Video> cmpmovvws = Comparator.comparing(Video::getNrviews);
         Collections.sort(filteredmovs, cmpmovvws);
         switch (type) {
@@ -396,6 +399,8 @@ public class Query {
         int k = 0, count = 0;
         ArrayList<Video> filteredmovs = new ArrayList<Video>();
         filteredmovs = getMovieListFav(filter);
+        Comparator<Video> cmpmovN = Comparator.comparing(Video::getName);
+        Collections.sort(filteredmovs, cmpmovN);
         Comparator<Video> cmpmovlth = Comparator.comparing(Video::getDuration);
         Collections.sort(filteredmovs, cmpmovlth);
         switch (type) {
@@ -471,6 +476,8 @@ public class Query {
         int k = 0, count = 0;
         ArrayList<Video> filteredsers = new ArrayList<Video>();
         filteredsers = getSerialListFav(filter);
+        Comparator<Video> cmpmovA = Comparator.comparing(Video::getName);
+        Collections.sort(filteredsers, cmpmovA);
         Comparator<Video> cmpmovF = Comparator.comparing(Video::getFavsappearances);
         Collections.sort(filteredsers, cmpmovF);
         switch (type) {
@@ -513,6 +520,8 @@ public class Query {
         int k = 0, count = 0;
         ArrayList<Video> filteredmovs = new ArrayList<Video>();
         filteredmovs = getSerialListFav(filter);
+        Comparator<Video> cmpmovN = Comparator.comparing(Video::getName);
+        Collections.sort(filteredmovs, cmpmovN);
         Comparator<Video> cmpmovlth = Comparator.comparing(Video::getDuration);
         Collections.sort(filteredmovs, cmpmovlth);
         switch (type) {
@@ -555,6 +564,8 @@ public class Query {
         int k = 0, count = 0;
         ArrayList<Video> filteredmovs = new ArrayList<Video>();
         filteredmovs = getSerialListFav(filter);
+        Comparator<Video> cmpmovA = Comparator.comparing(Video::getName);
+        Collections.sort(filteredmovs, cmpmovA);
         Comparator<Video> cmpmovvws = Comparator.comparing(Video::getNrviews);
         Collections.sort(filteredmovs, cmpmovvws);
         switch (type) {
@@ -578,6 +589,7 @@ public class Query {
                     if (filteredmovs.get(i).getNrviews() != 0) {
                         k = 1;
                         count++;
+                        System.out.println("MARCELOOO: " + filteredmovs.get(i).getName() + " " + filteredmovs.get(i).getNrviews());
                         start += filteredmovs.get(i).getName() + ", ";
                     }
                     if (count == nr) {

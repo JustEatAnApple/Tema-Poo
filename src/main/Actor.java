@@ -10,7 +10,7 @@ public class Actor {
     private String careerDescription;
     private ArrayList<String> filmography;
     private Map<ActorsAwards, Integer> awards;
-    private double rating;
+    private double rating = 0;
     private int nrofratings = 0;
     private int awdscounter = 0;
     private boolean haswords = false;
@@ -85,7 +85,7 @@ public class Actor {
     }
 
     public void addNrofratings() {
-        this.nrofratings++;
+        this.nrofratings += 1;
     }
 
     public void addRating(double r) {
