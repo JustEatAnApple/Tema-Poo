@@ -359,6 +359,9 @@ public class Query {
         Collections.sort(filteredmovs, cmpmovA);
         Comparator<Video> cmpmovvws = Comparator.comparing(Video::getNrviews);
         Collections.sort(filteredmovs, cmpmovvws);
+        for (int i = 0; i < filteredmovs.size(); i++) {
+            System.out.println("Kristo: " + filteredmovs.get(i).getNrviews() + " " + filteredmovs.get(i).getName());
+        }
         switch (type) {
             case "asc" -> {
                 for (Video v : filteredmovs) {

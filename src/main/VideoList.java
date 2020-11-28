@@ -34,6 +34,8 @@ public class VideoList {
     public void addMVideo(MovieList m, UserList u) {
         int priority = 10000;
         for (Movie mv : m.getList()) {
+            mv.setNviews(0);
+            mv.setFavsappearance(0);
             for (User us : u.getList()) {
                 for (int i = 0; i < us.getFavoriteMovies().size(); i++) {
                     if (us.getFavoriteMovies().get(i).equals(mv.getTitle())) {
@@ -44,7 +46,7 @@ public class VideoList {
                     String k = entry.getKey();
                     Integer v = entry.getValue();
                     if (k.equals(mv.getTitle())) {
-                        mv.addnofviews(1);
+                        mv.addnofviews(v);
                     }
                 }
             }
@@ -58,6 +60,8 @@ public class VideoList {
     public void addSVideo(SerialList s, UserList u) {
         int priority = 0;
         for (Serial sr : s.getList()) {
+            sr.setNrviews(0);
+            sr.setFavsappearances(0);
             for (User us : u.getList()) {
                 for (int i = 0; i < us.getFavoriteMovies().size(); i++) {
                     if (us.getFavoriteMovies().get(i).equals(sr.getTitle())) {
@@ -68,7 +72,7 @@ public class VideoList {
                     String k = entry.getKey();
                     Integer v = entry.getValue();
                     if (k.equals(sr.getTitle())) {
-                        sr.addnofviews(1);
+                        sr.addnofviews(v);
                     }
                 }
             }
@@ -78,6 +82,12 @@ public class VideoList {
             list.add(vdo);
             listofsr.add(vdo);
         }
+    }
+
+    public void destroyVideos() {
+        list.clear();
+        listofsr.clear();
+        listofmv.clear();
     }
 
 }

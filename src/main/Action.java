@@ -1,13 +1,12 @@
 package main;
 
-import fileio.ActionInputData;
-import fileio.SerialInputData;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
-public class Action {
+public final class Action {
     private int actionId;
     private String actionType;
     private String type;
@@ -26,16 +25,20 @@ public class Action {
     private ActorList actrs;
     private SerialList srls;
     private VideoList vds;
+    private Map<String, Integer> gnr;
     private User usr;
     private Movie mov;
     private Serial ser;
     private String output;
+    private final int j = 9;
+    private final int k = 3;
 
-    public Action(int actionId, String actionType, String type, String username,
-                  String objectType, String sortType, String criteria, String title,
-                  String genre, int number, double grade, int seasonNumber,
-                  List<List<String>> filters, UserList usrs, MovieList movs,
-                  ActorList actrs, SerialList srls) {
+    public Action(final int actionId, final String actionType, final String type,
+                  final String username, final String objectType, final String sortType,
+                  final String criteria, final String title, final String genre,
+                  final int number, final double grade, final int seasonNumber,
+                  final List<List<String>> filters, final UserList usrs, final MovieList movs,
+                  final ActorList actrs, final SerialList srls) {
         this.actionId = actionId;
         this.actionType = actionType;
         this.type = type;
@@ -56,12 +59,37 @@ public class Action {
         this.srls = srls;
     }
 
+    /**
+     * Function that generates the genres that exist in all shows and the number of views of each
+     * It is stored in the local variable gnr
+      */
+    public void getGnr() {
+        gnr = new HashMap<>();
+        for (Video vyd : vds.getList()) {
+            for (String gen : vyd.getGenres()) {
+                if (!gnr.containsKey(gen)) {
+                    gnr.put(gen, vyd.getNrviews());
+                } else {
+                    gnr.replace(gen, gnr.get(gen) + vyd.getNrviews());
+                }
+            }
+        }
+    }
+
+    /**
+     * Function that gathers both movies and serials into a separate class (VideoList)
+     * It is stored in the local variable vds
+     */
     public void getVdslist() {
         vds = new VideoList();
         vds.addMVideo(movs, usrs);
         vds.addSVideo(srls, usrs);
     }
 
+    /**
+     * Function that grabs a user from the UserList class to make changes upon the entity
+     * It is stored in the local variable usr
+     */
     public void grabUser() {
         for (int i = 0; i < usrs.getSize(); i++) {
             if (usrs.getUsername(i).equals(username)) {
@@ -70,6 +98,10 @@ public class Action {
         }
     }
 
+    /**
+     * Function that grabs a movie from the MovieList class to make changes upon the entity
+     * It is stored in the local variable mov
+      */
     public void grabMovie() {
         for (int i = 0; i < movs.getSize(); i++) {
             if (movs.getTitle(i).equals(title)) {
@@ -78,6 +110,10 @@ public class Action {
         }
     }
 
+    /**
+     * Function that grabs a serial from the SerialList class to make changes upon the entity
+     * It is stored in the local variable ser.
+     */
     public void grabSerial() {
         for (int i = 0; i < srls.getSize(); i++) {
             if (srls.getTitle(i).equals(title)) {
@@ -86,13 +122,17 @@ public class Action {
         }
     }
 
-
+    /**
+     * This is the function in which we check which action ( command, query or recommendation )
+     * we are dealing with.
+     * @return is the output that has to be written in a JSON file as requested
+     */
     public String checkActionType() {
         if (actionType.equals("command")) {
             grabUser();
             grabSerial();
             grabMovie();
-            Command c = new Command(title, movs, srls, usrs,seasonNumber);
+            Command c = new Command(title, movs, srls, usrs, seasonNumber);
             switch (type) {
                 case "favorite" -> {
                     return c.addFavourite(usr);
@@ -103,9 +143,14 @@ public class Action {
                 case "rating" -> {
                     return c.addRating(usr, grade, seasonNumber);
                 }
+                default -> {
+                    return null;
+                }
             }
         } else if (actionType.equals("query")) {
-            // doar numele
+            if (vds != null) {
+                vds.destroyVideos();
+            }
             getVdslist();
             Query q = new Query(movs, srls, actrs, usrs, vds);
             String start = "Query result: [";
@@ -116,10 +161,15 @@ public class Action {
                             return q.sortActorRating(sortType, number, start);
                         }
                         case "awards" -> {
-                            return q.sortActorAwards(sortType, filters.get(3), start);
+                            int i = j / k;
+                            return q.sortActorAwards(sortType, filters.get(i), start);
                         }
                         case "filter_description" -> {
-                            return q.sortActorDescription(sortType, filters.get(2), start);
+                            int i = 2;
+                            return q.sortActorDescription(sortType, filters.get(i), start);
+                        }
+                        default -> {
+                            return null;
                         }
                     }
                 }
@@ -137,6 +187,9 @@ public class Action {
                         case "most_viewed" -> {
                             return q.sortMovieView(sortType, number, start, filters);
                         }
+                        default -> {
+                            return null;
+                        }
                     }
                 }
                 case "shows" -> {
@@ -153,6 +206,9 @@ public class Action {
                         case "most_viewed" -> {
                             return q.sortSerialView(sortType, number, start, filters);
                         }
+                        default -> {
+                            return null;
+                        }
                     }
                 }
                 case "users" -> {
@@ -160,13 +216,29 @@ public class Action {
                         case "num_ratings" -> {
                             return q.sortUsersNrrates(sortType, number, start);
                         }
+                        default -> {
+                            return null;
+                        }
                     }
                 }
+                default -> {
+                    return null;
+                }
             }
-        } else if(actionType.equals("recommendation")) {
+        } else if (actionType.equals("recommendation")) {
             grabUser();
+            if (vds != null) {
+                vds.destroyVideos();
+            }
+            if (gnr != null) {
+                gnr.clear();
+            }
             getVdslist();
-            Recommendation r = new Recommendation(actrs, vds, usrs);
+            getGnr();
+            for (Map.Entry<String, Integer> entry : gnr.entrySet()) {
+                System.out.println("Genrezzz: " + entry.getKey() + " " + entry.getValue());
+            }
+            Recommendation r = new Recommendation(actrs, vds, usrs, gnr);
             switch (type) {
                 case "standard" -> {
                     return r.recommendStandard(usr);
@@ -192,6 +264,9 @@ public class Action {
                     }
                     return r.recommendSearch(usr, genre);
                 }
+                default -> {
+                    return null;
+                }
             }
         }
         return null;
@@ -201,7 +276,7 @@ public class Action {
         return actionId;
     }
 
-    public void setActionId(int actionId) {
+    public void setActionId(final int actionId) {
         this.actionId = actionId;
     }
 
@@ -209,7 +284,7 @@ public class Action {
         return actionType;
     }
 
-    public void setActionType(String actionType) {
+    public void setActionType(final String actionType) {
         this.actionType = actionType;
     }
 
@@ -217,7 +292,7 @@ public class Action {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
@@ -225,7 +300,7 @@ public class Action {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -233,7 +308,7 @@ public class Action {
         return objectType;
     }
 
-    public void setObjectType(String objectType) {
+    public void setObjectType(final String objectType) {
         this.objectType = objectType;
     }
 
@@ -241,7 +316,7 @@ public class Action {
         return sortType;
     }
 
-    public void setSortType(String sortType) {
+    public void setSortType(final String sortType) {
         this.sortType = sortType;
     }
 
@@ -249,7 +324,7 @@ public class Action {
         return criteria;
     }
 
-    public void setCriteria(String criteria) {
+    public void setCriteria(final String criteria) {
         this.criteria = criteria;
     }
 
@@ -257,7 +332,7 @@ public class Action {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -265,7 +340,7 @@ public class Action {
         return genre;
     }
 
-    public void setGenre(String genre) {
+    public void setGenre(final String genre) {
         this.genre = genre;
     }
 
@@ -273,7 +348,7 @@ public class Action {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(final int number) {
         this.number = number;
     }
 
@@ -281,7 +356,7 @@ public class Action {
         return grade;
     }
 
-    public void setGrade(double grade) {
+    public void setGrade(final double grade) {
         this.grade = grade;
     }
 
@@ -289,7 +364,7 @@ public class Action {
         return seasonNumber;
     }
 
-    public void setSeasonNumber(int seasonNumber) {
+    public void setSeasonNumber(final int seasonNumber) {
         this.seasonNumber = seasonNumber;
     }
 
@@ -297,7 +372,7 @@ public class Action {
         return filters;
     }
 
-    public void setFilters(List<List<String>> filters) {
+    public void setFilters(final List<List<String>> filters) {
         this.filters = filters;
     }
 

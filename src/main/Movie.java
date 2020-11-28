@@ -13,6 +13,18 @@ public class Movie {
     private int favsappearance;
     private int nviews;
 
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public void setFavsappearance(int favsappearance) {
+        this.favsappearance = favsappearance;
+    }
+
     public Movie() {}
 
     public Movie(String title, ArrayList<String> cast,
@@ -35,6 +47,10 @@ public class Movie {
 
     public void setRatings(ArrayList<Double> ratings) {
         this.ratings = ratings;
+    }
+
+    public void setNviews(int nviews) {
+        this.nviews = nviews;
     }
 
     @Override

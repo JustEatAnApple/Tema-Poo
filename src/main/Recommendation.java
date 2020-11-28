@@ -6,11 +6,13 @@ public class Recommendation {
     private ActorList a;
     private VideoList v;
     private UserList u;
+    private Map<String, Integer> g;
 
-    public Recommendation(ActorList a, VideoList v, UserList u) {
+    public Recommendation(ActorList a, VideoList v, UserList u, Map<String, Integer> g) {
         this.a = a;
         this.v = v;
         this.u = u;
+        this.g = g;
     }
 
     public String recommendStandard(User u) {
@@ -104,72 +106,50 @@ public class Recommendation {
         return aux;
     }
 
-    public static <K extends Comparable, V> Map<K,V> sortByKeys(Map<K,V> map)
-    {
-        Map<K, V> treeMap = new TreeMap<>(new Comparator<K>() {
-            @Override
-            public int compare(K a, K b) {
-                return b.compareTo(a);
-            }
-        });
-
-        treeMap.putAll(map);
-
-        return treeMap;
+    public Map<String, Integer> mapmerger(Map<String, Integer> first, Map<String, Integer> second) {
+        Map<String, Integer> themerger = new HashMap<String, Integer>();
+        for (Map.Entry<String, Integer> entry : first.entrySet()) {
+            String k = entry.getKey();
+            Integer v = entry.getValue();
+            themerger.put(k, v);
+        }
+        for (Map.Entry<String, Integer> entry : second.entrySet()) {
+            String k = entry.getKey();
+            Integer v = entry.getValue();
+            themerger.put(k, v);
+        }
+        return themerger;
     }
 
     public String recommendFavorite(User user) {
         Map<String, Integer> mbfavs = getBestMVFavs();
         Map<String, Integer> sbfavz = getBestSRFavs();
-        Map<String, Integer> fvsmvMap = sortByKeys(mbfavs);
-        Map<String, Integer> fvssrMap = sortByKeys(sbfavz);
-        int aux_size = 0;
-        if (fvsmvMap.size() > fvssrMap.size()) {
-            aux_size = fvsmvMap.size();
-        } else {
-            aux_size = fvssrMap.size();
-        }
-        for (int i = 0; i < aux_size; i++) {
-            int maxs = -1, maxm = -1;
-            String titles = "", titlem = "";
-            for (Map.Entry<String, Integer> entry : fvsmvMap.entrySet()) {
-                String kmaux = entry.getKey();
-                Integer vmaux = entry.getValue();
-                if (vmaux > maxm) {
-                    maxm = vmaux;
-                    titlem = kmaux;
+        Map<String, Integer> mergedmap = mapmerger(mbfavs, sbfavz);
+        Integer replacer = -1;
+        int max = -1, check = 1;
+        String title = "";
+        for (int i = 0; i < mergedmap.size(); i++) {
+            max = -1;
+            check = 1;
+            for (Map.Entry<String, Integer> entry : mergedmap.entrySet()) {
+                String ttl = entry.getKey();
+                Integer scr = entry.getValue();
+                if (scr > max) {
+                    max = scr;
+                    title = ttl;
                 }
             }
-            for (Map.Entry<String, Integer> entry : fvssrMap.entrySet()) {
-                String ksaux = entry.getKey();
-                Integer vsaux = entry.getValue();
-                if (vsaux > maxs) {
-                    maxs = vsaux;
-                    titles = ksaux;
-                }
-            }
-            int contors = 1, contorm = 1;
-            for (Map.Entry<String, Integer> entry: user.getHistory().entrySet()) {
+            for (Map.Entry<String, Integer> entry : user.getHistory().entrySet()) {
                 String k = entry.getKey();
-                if (k.equals(titlem)) {
-                    contorm = 0;
-                    contors = 0;
-                    break;
-                }
-                if (k.equals(titles)) {
-                    contorm = 0;
-                    contors = 0;
+                if (k.equals(title)) {
+                    check = 0;
                     break;
                 }
             }
-            if(contorm == 1) {
-                return "FavoriteRecommendation result: " + titlem;
+            if (check == 1) {
+                return "FavoriteRecommendation result: " + title;
             }
-            if(contors == 1) {
-                return "FavoriteRecommendation result: " + titles;
-            }
-            fvsmvMap.replace(titlem, -1);
-            fvssrMap.replace(titles, -1);
+            mergedmap.replace(title, replacer);
         }
         return "FavoriteRecommendation cannot be applied!";
     }
@@ -198,45 +178,39 @@ public class Recommendation {
         return lsgen;
     }
 
+    public VideoList combineSRMV(VideoList mv, VideoList sr) {
+        VideoList gnlist = new VideoList();
+        for (Video m : mv.getList()) {
+            gnlist.addVideo(m);
+        }
+        for (Video s : sr.getList()) {
+            gnlist.addVideo(s);
+        }
+        return gnlist;
+    }
+
     public String recommendSearch(User user, String gen) {
         int checkm, checks;
         String start = "SearchRecommendation result: [";
         VideoList movs = getMVListoftitles(gen);
         VideoList serls = getSRListoftitles(gen);
-        Comparator<Video> cmpMovN = Comparator.comparing(Video::getName);
-        Collections.sort(movs.getList(), cmpMovN);
-        Comparator<Video> cmpMov = Comparator.comparing(Video::getRating);
-        Collections.sort(movs.getList(), cmpMov);
-        Comparator<Video> cmpSrsN = Comparator.comparing(Video::getName);
-        Collections.sort(serls.getList(), cmpSrsN);
-        Comparator<Video> cmpSrs = Comparator.comparing(Video::getRating);
-        Collections.sort(serls.getList(), cmpSrs);
-        for (Video mv : movs.getList()) {
+        VideoList fulllist = combineSRMV(movs, serls);
+        Comparator<Video> cmplN = Comparator.comparing(Video::getName);
+        Collections.sort(fulllist.getList(), cmplN);
+        Comparator<Video> cmpl = Comparator.comparing(Video::getRating);
+        Collections.sort(fulllist.getList(), cmpl);
+        for (Video vdo : fulllist.getList()) {
             checkm = 1;
-            for (Map.Entry<String, Integer> entry: user.getHistory().entrySet()) {
+            for (Map.Entry<String, Integer> entry : user.getHistory().entrySet()) {
                 String k = entry.getKey();
                 Integer v = entry.getValue();
-                if (k.equals(mv.getName())) {
+                if (k.equals(vdo.getName())) {
                     checkm = 0;
                     break;
                 }
             }
             if (checkm == 1) {
-                start += ( mv.getName() + ", " );
-            }
-        }
-        for (Video sr : serls.getList()) {
-            checks = 1;
-            for (Map.Entry<String, Integer> entry: user.getHistory().entrySet()) {
-                String k = entry.getKey();
-                Integer v = entry.getValue();
-                if (k.equals(sr.getName())) {
-                    checks = 0;
-                    break;
-                }
-            }
-            if (checks == 1) {
-                start += ( sr.getName() + ", " );
+                start += (vdo.getName() + ", ");
             }
         }
         if (!start.equals("SearchRecommendation result: [")) {
@@ -247,11 +221,49 @@ public class Recommendation {
         return "SearchRecommendation cannot be applied!";
     }
 
-
-
     public String recommendPopular(User user) {
-
+        int max = -1, check, j = 0;
+        String title = "";
+        Integer replacer = -1;
+        ArrayList<String> hierarcy = new ArrayList<>();
+        for (int i = 0; i < g.size(); i++) {
+            max = -1;
+            for (Map.Entry<String, Integer> entry : g.entrySet()) {
+                String ttl = entry.getKey();
+                Integer scr = entry.getValue();
+                if (scr > max) {
+                    max = scr;
+                    title = ttl;
+                }
+            }
+            hierarcy.add(title);
+            g.replace(title, replacer);
+        }
+        for (int i = 0; i < hierarcy.size(); i++) {
+            if ((j + 1) >= hierarcy.size()) {
+                break;
+            }
+            for (Video video : v.getList()) {
+                System.out.println("Genul: " + title);
+                for (String genre : video.getGenres()) {
+                    check = 0;
+                    System.out.println("Daniel: " + hierarcy.get(j));
+                    if (genre.equals(hierarcy.get(j))) {
+                        for (Map.Entry<String, Integer> sentry : user.getHistory().entrySet()) {
+                            String k = sentry.getKey();
+                            if (k.equals(video.getName())) {
+                                check = 1;
+                                break;
+                            }
+                        }
+                        if (check == 0) {
+                            return "PopularRecommendation result: " + video.getName();
+                        }
+                    }
+                }
+            }
+            j++;
+        }
         return "PopularRecommendation cannot be applied!";
     }
-
 }

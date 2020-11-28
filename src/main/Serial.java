@@ -42,6 +42,8 @@ public class Serial {
         this.numberOfSeasons = numberOfSeasons;
         this.seasons = new ArrayList<main.Season>();
         getInputSeasons(seasons);
+        nrviews = 0;
+        favsappearances = 0;
     }
 
     public main.Season getcertainSeason(int nr) {
@@ -123,12 +125,26 @@ public class Serial {
         return rating;
     }
 
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
+    public int getFavsappearances() {
+        return favsappearances;
+    }
+
+    public void setFavsappearances(int favsappearances) {
+        this.favsappearances = favsappearances;
+    }
 
     public void makeDuration() {
         for (main.Season s : seasons) {
             this.duration += s.getDuration();
         }
+    }
+
+    public void setNrviews(int nrviews) {
+        this.nrviews = nrviews;
     }
 
     public int getNrviews() {
