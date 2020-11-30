@@ -1,20 +1,25 @@
 package main;
 
+import auxiliaryentities.Action;
+import auxiliarylists.ActorList;
+import auxiliarylists.MovieList;
+import auxiliarylists.SerialList;
+import auxiliarylists.UserList;
+import auxiliarylists.ActionList;
 import checker.Checkstyle;
 import checker.Checker;
 import common.Constants;
-import fileio.*;
+import fileio.Input;
+import fileio.InputLoader;
+import fileio.Writer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,6 +80,11 @@ public final class Main {
 
         //TODO add here the entry point to your implementation
 
+        /**
+         * We initialise the lists of input entities : actors, movies, serials, users and actions
+         * as entities that we have created
+         */
+
         ActorList listofActors = new ActorList();
         listofActors.getInputActors(input.getActors());
 
@@ -91,18 +101,14 @@ public final class Main {
         listofActions.getInputActions(input.getCommands(), listofUsers, listofMovies,
                 listofActors, listofSerials);
 
+        /**
+         * A loop that parses all of the actions that are required
+         */
         for (int i = 0; i < listofActions.getSize(); i++) {
             Action cmd = listofActions.getAction(i);
-            //cmd.checkActionType();
 
             JSONObject object = fileWriter.writeFile(cmd.getActionId(), "", cmd.checkActionType());
             arrayResult.add(object);
-            System.out.print("Alo boss: ");
-            System.out.println(object);
-            System.out.println();
-            // do commands field, mesaje
-
-
 
         }
         fileWriter.closeJSON(arrayResult);

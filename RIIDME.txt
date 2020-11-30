@@ -1,0 +1,12 @@
+We start by implementing auxiliary classes and lists for each of the entities required for the video platform ( actions, actors, movies, serials and users ).
+We then populate those lists with what we are given in the input, while also adding functionalities that will aid us in the actions required.
+Furthermore, we implement a class that merges all shows ( movies and serials ) so that we can more easily bounce between them, which significally simplifies both queries and recommendations.
+This is not required for the commands, as they do not need more than one show whether it is a serial or a movie.
+The per se beginning of the programme starts when we assure that we parse through all the actions. The most important part of the project happens within the Action class.
+In there we check which action we are dealing with and what to return for the main function by using a system of switches and auxiliary methods which parse the entities of the video platform.
+For each case ( command, query and recommendation ) we create a new object of the respective type. The fact that we do not encapsulate all the methods within one class helps with the clarity of the programme.
+Each object has its particular methods that aid in getting the output wanted as well as ensuring that it is not shallow ( that the actions made by the users are registered ). 
+What is to be kept in mind is the fact that when we initialise the object for each action we refresh the lists mentioned in the beginning so that the platform is up to date.
+In addition, we pass the lists by refference so that we have access to the whole database to make things run more smoothly.
+After each action we invoke the writer function in Main so that we place the output message of each action in the json file specified.
+The project reaches its conclusion when all the actions have been successfully managed and the database actualised. 
